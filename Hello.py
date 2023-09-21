@@ -1,6 +1,4 @@
 
-
-# Import statements (excluding voice-related parts)
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
 from langchain.prompts import BaseChatPromptTemplate
 from langchain import SerpAPIWrapper, LLMChain
@@ -117,10 +115,30 @@ def app():
         input_variables=["input", "intermediate_steps"]
     )
 
-    # Custom output parser (unchanged)
+    # Custom output parser
     class CustomOutputParser(AgentOutputParser):
-        # Your CustomOutputParser code remains unchanged
-        pass
+        def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
+            if "Final Answer:" in llm_output:
+                return AgentFinish(
+                    return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
+                    log=llm_output,
+                )
+
+            regex = r"Action\s*\d*\s*:(.*?)\nAction\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+            match = re.search(regex, llm_output, re.DOTALL)
+            if match:
+                action = match.group(1).strip()
+                action_input = match.group(2).strip(" ").strip('"')
+                return AgentAction(tool=action, tool_input=action_input, log=llm_output)
+
+            if "\nObservation:" in llm_output:
+                observation = llm_output.split("\nObservation:", 1)[-1].strip()
+                return AgentAction(tool="Observation", tool_input="", log=llm_output)
+
+            return AgentFinish(
+                return_values={"output": llm_output.strip()},
+                log=llm_output,
+            )
 
     # Creating an output parser
     output_parser = CustomOutputParser()
