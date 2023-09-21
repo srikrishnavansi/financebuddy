@@ -1,7 +1,6 @@
 langchain
 streamlit
 openai
-elevenlabs
 chromadb
 google-search-results
 google-api-python-client
