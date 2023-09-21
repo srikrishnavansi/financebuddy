@@ -1,6 +1,4 @@
-# Author: Suresh Ratlavath
-# Email: srdev3175@gmail.com
-# Date: 15-09-2023
+
 
 # Import statements (excluding voice-related parts)
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
